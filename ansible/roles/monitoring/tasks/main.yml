@@ -1,0 +1,25 @@
+---
+- name: Asegurar que SELinux este en modo Enforcing
+  ansible.builtin.selinux:
+    policy: targeted
+    state: enforcing
+
+- name: Asegurar que firewalld este activo y habilitado
+  ansible.builtin.systemd:
+    name: firewalld
+    state: started
+    enabled: true
+
+- name: Permitir trafico HTTPS en el firewall
+  ansible.builtin.firewalld:
+    service: https
+    permanent: true
+    state: enabled
+    immediate: true
+
+- name: Permitir trafico SSH en el firewall
+  ansible.builtin.firewalld:
+    service: ssh
+    permanent: true
+    state: enabled
+    immediate: true
