@@ -1,0 +1,6 @@
+---
+soundstream_network_name: "soundstream-net"
+soundstream_db_name: "soundstream"
+soundstream_db_user: "soundstream_user"
+# En produccion, el Lider DevOps sobrescribe esta variable usando Ansible Vault
+soundstream_db_password: "SoundStream2026_ChangeMeInVault!"

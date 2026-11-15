@@ -1,0 +1,5 @@
+---
+soundstream_network_name: "soundstream-net"
+soundstream_nginx_host_port: "8443"
+# Cambiar a "soundstream-api:8080" al integrar con el contenedor Java del Integrante 1
+soundstream_backend_target: "127.0.0.1:8081"

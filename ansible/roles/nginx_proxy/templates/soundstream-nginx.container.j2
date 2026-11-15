@@ -1,0 +1,18 @@
+[Unit]
+Description=Proxy Inverso y Servidor Multimedia Nginx - SoundStream
+After=network-online.target soundstream-db.service
+
+[Container]
+Image=docker.io/library/nginx:1.25-alpine
+ContainerName=soundstream-nginx
+Network={{ soundstream_network_name }}.network
+PublishPort={{ soundstream_nginx_host_port }}:80
+Volume=/home/sysadmin/soundstream-deploy/nginx/nginx.conf:/etc/nginx/nginx.conf:ro,Z
+Volume=/var/lib/soundstream/media:/usr/share/nginx/media:z
+
+[Service]
+Restart=always
+TimeoutStartSec=120
+
+[Install]
+WantedBy=default.target

@@ -1,0 +1,66 @@
+worker_processes auto;
+error_log /var/log/nginx/error.log warn;
+pid /tmp/nginx.pid;
+
+events {
+    worker_connections 1024;
+}
+
+http {
+    include       /etc/nginx/mime.types;
+    default_type  application/octet-stream;
+
+    sendfile          on;
+    tcp_nopush        on;
+    keepalive_timeout 65;
+
+    server {
+        listen 80;
+        server_name _;
+
+        location / {
+            default_type text/html;
+            return 200 '<h1>SoundStream Proxy Nginx OK</h1><p>Listo para conectar Frontend.</p>';
+        }
+
+        location /covers/ {
+            alias /usr/share/nginx/media/covers/;
+            expires 7d;
+            add_header Cache-Control "public, no-transform";
+        }
+
+        location /internal-audio/ {
+            internal;
+            alias /usr/share/nginx/media/audio/;
+            sendfile on;
+            tcp_nopush on;
+        }
+
+        location /api/ {
+            proxy_pass http://{{ soundstream_backend_target }};
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+        }
+    }
+
+    server {
+        listen 127.0.0.1:8081;
+
+        location /api/health {
+            default_type application/json;
+            return 200 '{"status":"OK","proxy":"nginx","db_host":"soundstream-db"}';
+        }
+
+        location /api/stream/1 {
+            add_header X-Accel-Redirect /internal-audio/demo_teleferico.mp3;
+            add_header Content-Type audio/mpeg;
+            return 200;
+        }
+
+        location /api/stream/2 {
+            add_header X-Accel-Redirect /internal-audio/demo_kernel_panic.mp3;
+            add_header Content-Type audio/mpeg;
+            return 200;
+        }
+    }
+}
