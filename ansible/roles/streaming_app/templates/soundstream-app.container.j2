@@ -1,0 +1,17 @@
+[Unit]
+Description=Contenedor Tomcat SoundStream
+After=soundstream-db.service
+Requires=soundstream-db.service
+
+[Container]
+Image=docker.io/library/tomcat:10.1-jdk17-temurin-jammy
+ContainerName=soundstream-app
+Network=soundstream-net.network
+PublishPort=8080:8080
+Volume=/home/sysadmin/projects/soundstream/media:/usr/local/tomcat/webapps/media:Z
+
+[Service]
+Restart=always
+
+[Install]
+WantedBy=default.target

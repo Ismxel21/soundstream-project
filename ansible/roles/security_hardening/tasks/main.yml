@@ -1,0 +1,21 @@
+---
+- name: Asegurar que SELinux este en modo Enforcing
+  ansible.posix.selinux:
+    policy: targeted
+    state: enforcing
+
+- name: Asegurar que firewalld este activo y habilitado
+  ansible.builtin.service:
+    name: firewalld
+    state: started
+    enabled: true
+
+- name: Permitir SSH y HTTPS en firewalld
+  ansible.posix.firewalld:
+    service: "{{ item }}"
+    permanent: true
+    immediate: true
+    state: enabled
+  loop:
+    - ssh
+    - https

@@ -1,0 +1,11 @@
+---
+- name: Despliegue de infraestructura SoundStream
+  hosts: all
+  become: true
+  roles:
+    - podman_setup
+    - security_hardening
+    - database
+    - streaming_app
+    - nginx_proxy
+    - monitoring

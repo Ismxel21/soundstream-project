@@ -1,0 +1,17 @@
+---
+- name: Desplegar unidad Quadlet para streaming_app
+  ansible.builtin.template:
+    src: soundstream-app.container.j2
+    dest: /home/sysadmin/.config/containers/systemd/soundstream-app.container
+    owner: sysadmin
+    group: sysadmin
+    mode: "0644"
+
+- name: Recargar daemon systemd de usuario para sysadmin
+  ansible.builtin.systemd:
+    daemon_reload: true
+    scope: user
+  become: true
+  become_user: sysadmin
+  environment:
+    XDG_RUNTIME_DIR: "/run/user/{{ ansible_facts['user_uid'] | default(1000) }}"
