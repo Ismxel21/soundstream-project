@@ -1,0 +1,16 @@
+[Unit]
+Description=SoundStream - API REST (Tomcat)
+
+[Container]
+Image=localhost/soundstream-api:latest
+ContainerName=soundstream-api
+Network=soundstream.network
+EnvironmentFile=%h/.config/soundstream/tomcat.env
+# Limites por definir con el Integrante 4 (propuesta inicial: 1 GB)
+PodmanArgs=--memory=1g
+
+[Service]
+Restart=always
+
+[Install]
+WantedBy=default.target
