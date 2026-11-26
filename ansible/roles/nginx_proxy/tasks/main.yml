@@ -1,0 +1,39 @@
+---
+- name: Crear directorio de configuracion local para Nginx
+  ansible.builtin.file:
+    path: /home/sysadmin/soundstream-deploy/nginx
+    state: directory
+    mode: '0755'
+
+- name: Crear carpetas compartidas de medios (audio y covers) con propiedad sysadmin
+  become: true
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    owner: sysadmin
+    group: sysadmin
+    mode: '0775'
+  loop:
+    - /var/lib/soundstream
+    - /var/lib/soundstream/media
+    - /var/lib/soundstream/media/audio
+    - /var/lib/soundstream/media/covers
+
+- name: Generar archivo de configuracion nginx.conf
+  ansible.builtin.template:
+    src: nginx.conf.j2
+    dest: /home/sysadmin/soundstream-deploy/nginx/nginx.conf
+    mode: '0644'
+
+- name: Generar unidad systemd Quadlet para Nginx
+  ansible.builtin.template:
+    src: soundstream-nginx.container.j2
+    dest: /home/sysadmin/.config/containers/systemd/soundstream-nginx.container
+    mode: '0644'
+
+- name: Recargar systemd de usuario e iniciar contenedor Nginx
+  ansible.builtin.systemd:
+    name: soundstream-nginx.service
+    state: started
+    daemon_reload: true
+    scope: user

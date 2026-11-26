@@ -1,0 +1,10 @@
+[Unit]
+Description=Temporizador diario de respaldos PostgreSQL - SoundStream
+
+[Timer]
+OnCalendar=daily
+RandomizedDelaySec=5m
+Persistent=true
+
+[Install]
+WantedBy=timers.target

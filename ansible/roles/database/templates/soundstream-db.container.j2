@@ -1,0 +1,21 @@
+[Unit]
+Description=Base de Datos PostgreSQL 15 - SoundStream
+After=network-online.target
+
+[Container]
+Image=docker.io/library/postgres:15-alpine
+ContainerName=soundstream-db
+Network={{ soundstream_network_name }}.network
+EnvironmentFile=/home/sysadmin/.config/containers/systemd/postgres.env
+Volume=soundstream-pgdata.volume:/var/lib/postgresql/data:Z
+Volume=/home/sysadmin/soundstream-deploy/database/init.sql:/docker-entrypoint-initdb.d/init.sql:ro,Z
+HealthCmd=pg_isready -U {{ soundstream_db_user }} -d {{ soundstream_db_name }}
+HealthInterval=10s
+HealthRetries=5
+
+[Service]
+Restart=always
+TimeoutStartSec=120
+
+[Install]
+WantedBy=default.target

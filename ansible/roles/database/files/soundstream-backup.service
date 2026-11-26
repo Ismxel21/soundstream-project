@@ -1,0 +1,8 @@
+[Unit]
+Description=Respaldo lógico comprimido de PostgreSQL - SoundStream
+After=soundstream-db.service
+Requires=soundstream-db.service
+
+[Service]
+Type=oneshot
+ExecStart=/home/sysadmin/soundstream-deploy/database/backup_db.sh

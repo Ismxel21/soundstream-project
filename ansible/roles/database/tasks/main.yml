@@ -1,0 +1,71 @@
+---
+- name: Crear directorios de despliegue y systemd para usuario sysadmin
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    mode: '0755'
+  loop:
+    - /home/sysadmin/soundstream-deploy/database
+    - /home/sysadmin/.config/containers/systemd
+    - /home/sysadmin/.config/systemd/user
+
+- name: Crear directorio de respaldos con propiedad de sysadmin
+  become: true
+  ansible.builtin.file:
+    path: /var/backups/soundstream
+    state: directory
+    owner: sysadmin
+    group: sysadmin
+    mode: '0755'
+
+- name: Copiar esquema DDL inicial de PostgreSQL
+  ansible.builtin.copy:
+    src: init.sql
+    dest: /home/sysadmin/soundstream-deploy/database/init.sql
+    mode: '0644'
+
+- name: Generar archivo de variables de entorno de PostgreSQL
+  ansible.builtin.template:
+    src: postgres.env.j2
+    dest: /home/sysadmin/.config/containers/systemd/postgres.env
+    mode: '0600'
+
+- name: Generar unidades systemd Quadlet para red, volumen y PostgreSQL
+  ansible.builtin.template:
+    src: "{{ item }}.j2"
+    dest: "/home/sysadmin/.config/containers/systemd/{{ item }}"
+    mode: '0644'
+  loop:
+    - soundstream-net.network
+    - soundstream-pgdata.volume
+    - soundstream-db.container
+
+- name: Generar script Bash de respaldos automaticos
+  ansible.builtin.template:
+    src: backup_db.sh.j2
+    dest: /home/sysadmin/soundstream-deploy/database/backup_db.sh
+    mode: '0750'
+
+- name: Copiar unidades systemd de servicio y temporizador de respaldo
+  ansible.builtin.copy:
+    src: "{{ item }}"
+    dest: "/home/sysadmin/.config/systemd/user/{{ item }}"
+    mode: '0644'
+  loop:
+    - soundstream-backup.service
+    - soundstream-backup.timer
+
+- name: Recargar systemd de usuario e iniciar base de datos PostgreSQL
+  ansible.builtin.systemd:
+    name: soundstream-db.service
+    state: started
+    daemon_reload: true
+    scope: user
+
+- name: Habilitar e iniciar temporizador diario de respaldos
+  ansible.builtin.systemd:
+    name: soundstream-backup.timer
+    state: started
+    enabled: true
+    daemon_reload: true
+    scope: user
