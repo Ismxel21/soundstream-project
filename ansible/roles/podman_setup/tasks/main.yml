@@ -1,0 +1,22 @@
+---
+- name: Instalar Podman y dependencias rootless
+  ansible.builtin.dnf:
+    name:
+      - podman
+      - slirp4netns
+      - crun
+      - container-selinux
+    state: present
+
+- name: Habilitar linger para sysadmin
+  ansible.builtin.command: loginctl enable-linger sysadmin
+  args:
+    creates: /var/lib/systemd/linger/sysadmin
+
+- name: Crear directorio Quadlet para sysadmin
+  ansible.builtin.file:
+    path: /home/sysadmin/.config/containers/systemd/
+    state: directory
+    owner: sysadmin
+    group: sysadmin
+    mode: "0755"
